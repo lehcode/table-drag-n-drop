@@ -61,6 +61,7 @@ const DragDropComponent: React.FC = () => {
   };
 
   
+
   /**
    * Handles the drag end event and updates the state based on the drag result.
    *
@@ -89,6 +90,7 @@ const DragDropComponent: React.FC = () => {
   };
 
   
+  
   /**
    * Saves the current state of the drag and drop component by sending a POST request to the server
    * and storing the data in local storage. Also sets a state variable to indicate a successful save.
@@ -104,8 +106,10 @@ const DragDropComponent: React.FC = () => {
   };
 
   
+  
   /**
    * Handles the undo operation for removing an item from the attached IDs list.
+   * Moves the item back to the right table if it exists in the left table.
    *
    * @param {number} index - The index of the item to be undone.
    * @return {void}
@@ -247,11 +251,11 @@ const DragDropComponent: React.FC = () => {
         <h3>Attached IDs:</h3>
           {attachedIds.map((id, index) => (
           <div key={index}>
-            {id} <button onClick={() => handleUndo(index)}>Undo</button>
+            {id} <button onClick={() => handleUndo(index)} className="bg-red-500 text-white px-2 py-1 rounded">Undo</button>
           </div>
         ))}
         </div>}
-      <button onClick={handleSave} style={{ marginTop: '10px' }}>Save</button>
+      <button onClick={handleSave} style={{ marginTop: '10px' }} className="bg-indigo-500 text-white">Save</button>
     </DragDropContext>
     </div>
   );
