@@ -222,7 +222,7 @@ const DragDropComponent: React.FC = () => {
               {rightItems.map((item, index) => (
                 <Draggable key={item.id} draggableId={item.id} index={index}>
                   {(provided) => (
-                              <tr
+                        <tr
                       ref={provided.innerRef}
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
@@ -242,7 +242,8 @@ const DragDropComponent: React.FC = () => {
         </Droppable>
       </div>
         </div>
-        {attachedIds.length && <div style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f0f0f0' }}>
+        {attachedIds.length > 0 && 
+        <div style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f0f0f0' }}>
         <h3>Attached IDs:</h3>
           {attachedIds.map((id, index) => (
           <div key={index}>
