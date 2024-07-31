@@ -1,22 +1,25 @@
 import { Injectable } from '@nestjs/common';
+import { Faker, he, en, base } from '@faker-js/faker';
+import { Item, ItemsResponse } from 'types';
+
+const baseArr = new Array(5).fill(null);
+const customFaker = new Faker({locale: [he, en, base]});
 
 @Injectable()
 export class AppService {
-  private leftItems = [
-    { id: '1', description: 'Item 1' },
-    { id: '2', description: 'Item 2' },
-    // Add more items as needed
-  ];
+  private leftItems: Item[] = baseArr.map((_, idx) => ({
+    id: idx + 1,
+    description: customFaker.lorem.words({min: 1, max: 3}),
+  }));
 
-  private rightItems = [
-    { id: '3', description: 'Item 3' },
-    { id: '4', description: 'Item 4' },
-    // Add more items as needed
-  ];
+  private rightItems: Item[] = baseArr.map((_, idx) => ({
+    id: idx + 1 + baseArr.length,
+    description: customFaker.lorem.words({min: 1, max: 3}),
+  }));
 
-  private attachedIds: string[] = [];
+  private attachedIds: number[] = [];
 
-  getItems() {
+  getItems(): ItemsResponse {
     return {
       leftItems: this.leftItems,
       rightItems: this.rightItems,
@@ -24,7 +27,7 @@ export class AppService {
     };
   }
 
-  saveAttachedIds(ids: string[]) {
+  saveAttachedIds(ids: number[]): { success: boolean } {
     this.attachedIds = ids;
     return { success: true };
   }

@@ -2,18 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, OnDragEndResponder } from '@hello-pangea/dnd';
 import axios from 'axios';
-
-
-type Item = {
-  id: string;
-  description: string;
-}
-
-type ItemsResponse = {
-  leftItems: Item[],
-  rightItems: Item[],
-  attachedIds: string[]
-}
+import { Item, ItemsResponse } from 'types';
 
 /**
  * Renders a drag and drop component with two tables: left table and right table.
@@ -28,13 +17,13 @@ type ItemsResponse = {
 const DragDropComponent: React.FC = () => {
   const [leftItems, setLeftItems] = useState<Item[]>([]);
   const [rightItems, setRightItems] = useState<Item[]>([]);
-  const [attachedIds, setAttachedIds] = useState<string[]>([]);
+  const [attachedIds, setAttachedIds] = useState<number[]>([]);
   const [saveSuccess, setSaveSuccess] = useState(false);
   
   useEffect(() => {
     const storedData = localStorage.getItem('dragDropData');
     if (storedData) {
-      const { leftItems, rightItems, attachedIds } = JSON.parse(storedData);
+      const { leftItems, rightItems, attachedIds }: ItemsResponse = JSON.parse(storedData);
       setLeftItems(leftItems);
       setRightItems(rightItems);
       setAttachedIds(attachedIds);
@@ -117,15 +106,7 @@ const DragDropComponent: React.FC = () => {
   const handleUndo = (index: number): void => {
     setAttachedIds(prev => {
       const newAttachedIds = [...prev];
-      const removedId = newAttachedIds.splice(index, 1)[0];
-      
-      // Move item back to right table
-      const itemToMove = leftItems.find(item => item.id === removedId);
-      if (itemToMove) {
-        setLeftItems(prev => prev.filter(item => item.id !== removedId));
-        setRightItems(prev => [...prev, itemToMove]);
-      }
-
+      newAttachedIds.splice(index, 1);
       return newAttachedIds;
     });
   };
@@ -208,7 +189,7 @@ const DragDropComponent: React.FC = () => {
                     </thead>
                     <tbody>
               {leftItems.map((item, index) => (
-                <Draggable key={item.id} draggableId={item.id} index={index}>
+                <Draggable key={item.id} draggableId={item.id.toString()} index={index}>
                   {(provided) => (
                             <tr
                       ref={provided.innerRef}
@@ -252,7 +233,7 @@ const DragDropComponent: React.FC = () => {
                       </thead>
                       <tbody>
               {rightItems.map((item, index) => (
-                <Draggable key={item.id} draggableId={item.id} index={index}>
+                <Draggable key={item.id} draggableId={item.id.toString()} index={index}>
                   {(provided) => (
                         <tr
                       ref={provided.innerRef}
