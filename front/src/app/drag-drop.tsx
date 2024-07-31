@@ -106,15 +106,7 @@ const DragDropComponent: React.FC = () => {
   const handleUndo = (index: number): void => {
     setAttachedIds(prev => {
       const newAttachedIds = [...prev];
-      const removedId = newAttachedIds.splice(index, 1)[0];
-      
-      // Move item back to right table
-      const itemToMove = leftItems.find(item => item.id === removedId);
-      if (itemToMove) {
-        setLeftItems(prev => prev.filter(item => item.id !== removedId));
-        setRightItems(prev => [...prev, itemToMove]);
-      }
-
+      newAttachedIds.splice(index, 1);
       return newAttachedIds;
     });
   };
