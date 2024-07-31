@@ -1,5 +1,7 @@
 # Table Drag'n'Drop
 
+![alt text](preview.png)
+
 ## Project Requirements
 
 1. Node v18+
