@@ -19,11 +19,11 @@ export class AppController {
    * Saves the attachedIds data to the app service.
    *
    * @param {Object} data - The data object containing the attachedIds.
-   * @param {string[]} data.attachedIds - An array of strings representing the attachedIds.
+   * @param {number[]} data.attachedIds - An array of numbers representing the attachedIds.
    * @return {Promise<any>} A promise that resolves with the result of saving the attachedIds.
    */
   @Post('save')
-  saveAttachedIds(@Body() data: { attachedIds: string[] }) {
+  saveAttachedIds(@Body() data: { attachedIds: number[] }) {
     return this.appService.saveAttachedIds(data.attachedIds);
   }
 }
