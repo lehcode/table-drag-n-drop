@@ -14,7 +14,9 @@
 4. Run `yarn install` to install dependencies.
 5. Run `yarn start-all` to run both projects in parallel.
 
-## Once completed
+### Once completed
 
 Frontend is available at `http://localhost:4200`
 Backend is available at `http://localhost:3000`
+
+NOTE: Relaunch `yarn start-all` to reset backend state. Use DevTools to reset `localStorage`.
