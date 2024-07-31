@@ -227,14 +227,14 @@ const DragDropComponent: React.FC = () => {
               </Droppable>
             </div>
         </div>
-        <div style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f0f0f0' }}>
+        {attachedIds.length && <div style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f0f0f0' }}>
           <h3>Attached IDs:</h3>
           {attachedIds.map((id, index) => (
             <div key={index}>
               {id} <button onClick={() => handleUndo(index)}>Undo</button>
             </div>
           ))}
-        </div>
+        </div>}
         <button onClick={handleSave} style={{ marginTop: '10px' }}>Save</button>
       </DragDropContext>
     </div>
