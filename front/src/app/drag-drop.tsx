@@ -25,7 +25,15 @@ const DragDropComponent: React.FC = () => {
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
-    fetchItems();
+    const storedData = localStorage.getItem('dragDropData');
+    if (storedData) {
+      const { leftItems, rightItems, attachedIds } = JSON.parse(storedData);
+      setLeftItems(leftItems);
+      setRightItems(rightItems);
+      setAttachedIds(attachedIds);
+    } else {
+      fetchItems();
+    }
   }, []);
 
   const fetchItems = async () => {
@@ -73,8 +81,10 @@ const DragDropComponent: React.FC = () => {
   * @return {Promise<void>} - A promise that resolves when the data is successfully saved, or rejects
   * with an error if there was an issue saving the data.
   */
-  const handleSave = () => {
-    document.dispatchEvent(new Event('save'));
+  const handleSave = async() => {
+    const data = { leftItems, rightItems, attachedIds };
+    await axios.post('http://localhost:3000/api/save', data);
+    localStorage.setItem('dragDropData', JSON.stringify(data));
     setSaveSuccess(true);
     setTimeout(() => setSaveSuccess(false), 3000);
   };
