@@ -29,8 +29,6 @@ const DragDropComponent: React.FC = () => {
   const [attachedIds, setAttachedIds] = useState<string[]>([]);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  const state$ = new BehaviorSubject<ItemsResponse>({ leftItems: [], rightItems: [], attachedIds: [] });
-
   useEffect(() => {
     const storedData = localStorage.getItem('dragDropData');
     if (storedData) {
