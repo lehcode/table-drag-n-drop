@@ -17,10 +17,13 @@ type ItemsResponse = {
 
 /**
  * Renders a drag and drop component with two tables: left table and right table.
- * Allows dragging and dropping items from right to left table.
- * Saves the attached IDs to local storage and displays them.
+ * The component allows users to drag items from the left table to the right table.
+ * The dragged items are added to the attachedIds list.
+ * The component also allows users to undo the last drag operation by removing an item from the attachedIds list.
+ * The component saves the leftItems, rightItems, and attachedIds to the local storage when the save button is clicked.
+ * The component displays a success message for 3 seconds after a successful save.
  *
- * @return {ReactElement} The rendered drag and drop component.
+ * @return {JSX.Element} The rendered drag and drop component.
  */
 const DragDropComponent: React.FC = () => {
   const [leftItems, setLeftItems] = useState<Item[]>([]);
@@ -40,11 +43,12 @@ const DragDropComponent: React.FC = () => {
     }
   }, []);
 
+  
   /**
-  * Fetches items from the API and updates the state with the fetched data.
-  *
-  * @return {Promise<void>} A promise that resolves when the items have been fetched and the state has been updated.
-  */
+   * Fetches items from the server and updates the component state with the response data.
+   *
+   * @return {Promise<void>} A promise that resolves when the items are fetched and the state is updated.
+   */
   const fetchItems = async () => {
     try {
       const response = await axios.get<ItemsResponse>('http://localhost:3000/api/items');
@@ -56,12 +60,13 @@ const DragDropComponent: React.FC = () => {
     }
   };
 
+  
   /**
-  * Handles the onDragEnd event and updates the state accordingly.
-  *
-  * @param {OnDragEndResponder} result - The object containing result of the drag and drop operation.
-  * @return {void}
-  */
+   * Handles the drag end event and updates the state based on the drag result.
+   *
+   * @param {OnDragEndResponder} result - The result of the drag end event.
+   * @return {void}
+   */
   const onDragEnd: OnDragEndResponder = (result) => {
     if (!result.destination) return;
 
@@ -85,11 +90,11 @@ const DragDropComponent: React.FC = () => {
 
   
   /**
-  * Saves the current state of the drag and drop items and attached IDs to the server
-  * and updates the local storage. Displays a success message for 3 seconds.
-  *
-  * @return {Promise<void>}
-  */
+   * Saves the current state of the drag and drop component by sending a POST request to the server
+   * and storing the data in local storage. Also sets a state variable to indicate a successful save.
+   *
+   * @return {Promise<void>} A promise that resolves when the save operation is complete.
+   */
   const handleSave = async() => {
     const data = { leftItems, rightItems, attachedIds };
     await axios.post('http://localhost:3000/api/save', data);
@@ -98,12 +103,13 @@ const DragDropComponent: React.FC = () => {
     setTimeout(() => setSaveSuccess(false), 3000);
   };
 
+  
   /**
-  * Handles the undo operation for removing an item from the attached IDs list.
-  *
-  * @param {number} index - The index of the item to be undone.
-  * @return {void} This function does not return anything.
-  */
+   * Handles the undo operation for removing an item from the attached IDs list.
+   *
+   * @param {number} index - The index of the item to be undone.
+   * @return {void}
+   */
   const handleUndo = (index: number): void => {
     setAttachedIds(prev => {
       const newAttachedIds = [...prev];
