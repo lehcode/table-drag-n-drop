@@ -14,7 +14,9 @@ type ItemsResponse = {
 }
 
 /**
- * Renders a drag and drop component that allows the user to move items between two tables.
+ * Renders a drag and drop component with two tables: left table and right table.
+ * Allows dragging and dropping items from right to left table.
+ * Saves the attached IDs to local storage and displays them.
  *
  * @return {ReactElement} The rendered drag and drop component.
  */
@@ -36,6 +38,11 @@ const DragDropComponent: React.FC = () => {
     }
   }, []);
 
+  /**
+  * Fetches items from the API and updates the state with the fetched data.
+  *
+  * @return {Promise<void>} A promise that resolves when the items have been fetched and the state has been updated.
+  */
   const fetchItems = async () => {
     try {
       const response = await axios.get<ItemsResponse>('http://localhost:3000/api/items');
@@ -48,9 +55,9 @@ const DragDropComponent: React.FC = () => {
   };
 
   /**
-  * Handles the end of a drag operation.
+  * Handles the onDragEnd event and updates the state accordingly.
   *
-  * @param {DragDropResult} result - The result of the drag operation.
+  * @param {OnDragEndResponder} result - The object containing result of the drag and drop operation.
   * @return {void}
   */
   const onDragEnd: OnDragEndResponder = (result) => {
@@ -74,12 +81,12 @@ const DragDropComponent: React.FC = () => {
     }
   };
 
+  
   /**
-  * Saves the current state of the drag and drop component by making a POST request to the server
-  * and storing the data in local storage.
+  * Saves the current state of the drag and drop items and attached IDs to the server
+  * and updates the local storage. Displays a success message for 3 seconds.
   *
-  * @return {Promise<void>} - A promise that resolves when the data is successfully saved, or rejects
-  * with an error if there was an issue saving the data.
+  * @return {Promise<void>}
   */
   const handleSave = async() => {
     const data = { leftItems, rightItems, attachedIds };
@@ -90,7 +97,7 @@ const DragDropComponent: React.FC = () => {
   };
 
   /**
-  * Handles the undo operation for a specific index in the attachedIds array.
+  * Handles the undo operation for removing an item from the attached IDs list.
   *
   * @param {number} index - The index of the item to be undone.
   * @return {void} This function does not return anything.
