@@ -30,72 +30,15 @@ const DragDropComponent: React.FC = () => {
   const state$ = new BehaviorSubject<ItemsResponse>({ leftItems: [], rightItems: [], attachedIds: [] });
 
   useEffect(() => {
-    const fetchItems$ = axios.get<ItemsResponse>('http://localhost:3000/api/items');
-
-    const dragEnd$ = fromEvent<CustomEvent>(document, 'dragend').pipe(
-      map(event => event.detail),
-      tap(result => {
-        if (!result.destination) return;
-        if (result.source.droppableId === 'rightTable' && result.destination.droppableId === 'leftTable') {
-          const currentState = state$.getValue();
-          const draggedItem = currentState.rightItems[result.source.index];
-          
-          const newRightItems = currentState.rightItems.filter((_, index) => index !== result.source.index);
-          const newLeftItems = [
-            ...currentState.leftItems.slice(0, result.destination.index),
-            draggedItem,
-            ...currentState.leftItems.slice(result.destination.index)
-          ];
-          const newAttachedIds = [...currentState.attachedIds, draggedItem.id];
-
-          state$.next({ leftItems: newLeftItems, rightItems: newRightItems, attachedIds: newAttachedIds });
-        }
-      })
-    );
-
-    const undo$ = fromEvent<CustomEvent>(document, 'undo').pipe(
-      map(event => event.detail as number),
-      tap(index => {
-        const currentState = state$.getValue();
-        const newAttachedIds = currentState.attachedIds.filter((_, i) => i !== index);
-        const removedId = currentState.attachedIds[index];
-        const itemToMove = currentState.leftItems.find(item => item.id === removedId);
-        
-        if (itemToMove) {
-          const newLeftItems = currentState.leftItems.filter(item => item.id !== removedId);
-          const newRightItems = [...currentState.rightItems, itemToMove];
-
-          state$.next({ leftItems: newLeftItems, rightItems: newRightItems, attachedIds: newAttachedIds });
-        }
-      })
-    );
-
-    const save$ = fromEvent(document, 'save').pipe(
-      switchMap(() => {
-        const currentState = state$.getValue();
-        return axios.post('http://localhost:3000/api/save', currentState);
-      }),
-      tap(() => {
-        localStorage.setItem('dragDropData', JSON.stringify(state$.getValue()));
-      })
-    );
-
-    const subscription = merge(fetchItems$, dragEnd$, undo$, save$).subscribe({
-      next: (response) => {
-        if (response && 'data' in response) {
-          state$.next(response.data);
-        }
-      },
-      error: (error) => console.error('Error:', error)
-    });
-
-    state$.subscribe(state => {
-      setLeftItems(state.leftItems);
-      setRightItems(state.rightItems);
-      setAttachedIds(state.attachedIds);
-    });
-
-    return () => subscription.unsubscribe();
+    const storedData = localStorage.getItem('dragDropData');
+    if (storedData) {
+      const { leftItems, rightItems, attachedIds } = JSON.parse(storedData);
+      setLeftItems(leftItems);
+      setRightItems(rightItems);
+      setAttachedIds(attachedIds);
+    } else {
+      fetchItems();
+    }
   }, []);
 
 
@@ -104,9 +47,19 @@ const DragDropComponent: React.FC = () => {
     document.dispatchEvent(new CustomEvent('dragend', { detail: result }));
   };
 
-  
-  const handleSave = async () => {
-    document.dispatchEvent(new Event('save'));
+  /**
+  * Saves the current state of the drag and drop component by making a POST request to the server
+  * and storing the data in local storage.
+  *
+  * @return {Promise<void>} - A promise that resolves when the data is successfully saved, or rejects
+  * with an error if there was an issue saving the data.
+  */
+  const handleSave = async() => {
+    const data = { leftItems, rightItems, attachedIds };
+    await axios.post('http://localhost:3000/api/save', data);
+    localStorage.setItem('dragDropData', JSON.stringify(data));
+    setSaveSuccess(true);
+    setTimeout(() => setSaveSuccess(false), 3000);
   };
 
   /**
@@ -234,21 +187,6 @@ const DragDropComponent: React.FC = () => {
                 )}
               </Droppable>
             </div>
-<<<<<<< HEAD
-          )}
-        </Droppable>
-      </div>
-      <div style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f0f0f0' }}>
-        <h3>Attached IDs:</h3>
-        {attachedIds?.map((id, index) => (
-          <div key={index}>
-            {id} <button onClick={() => handleUndo(index)}>Undo</button>
-          </div>
-        ))}
-      </div>
-      <button onClick={handleSave} style={{ marginTop: '10px' }}>Save</button>
-    </DragDropContext>
-=======
         </div>
         <div style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f0f0f0' }}>
           <h3>Attached IDs:</h3>
@@ -261,7 +199,6 @@ const DragDropComponent: React.FC = () => {
         <button onClick={handleSave} style={{ marginTop: '10px' }}>Save</button>
       </DragDropContext>
     </div>
->>>>>>> 84cf7c2 (feat: Update styling, layout)
   );
 };
 
