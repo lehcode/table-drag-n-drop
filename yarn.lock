@@ -2192,7 +2192,7 @@
     webpack-node-externals "^3.0.0"
     webpack-subresource-integrity "^5.1.0"
 
-"@nx/workspace@19.5.4":
+"@nx/workspace@19.5.4", "@nx/workspace@^19.5.4":
   version "19.5.4"
   resolved "https://registry.yarnpkg.com/@nx/workspace/-/workspace-19.5.4.tgz#8835d3439ba1805f069871f3f16ccae85ebc30fa"
   integrity sha512-GI3uMJYwPxjPGHA0UuXZtIqf/fgiCDq63Ns7zpdzwaeOvQbtHySFVV6zclXx/3dXjJsBpEiOYNKPGf17jqx6Dw==
