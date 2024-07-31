@@ -1,4 +1,4 @@
-# Table Dran'n'Drop
+# Table Drag'n'Drop
 
 ## Project Requirements
 
