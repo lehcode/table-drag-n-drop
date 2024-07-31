@@ -2,8 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, OnDragEndResponder } from '@hello-pangea/dnd';
 import axios from 'axios';
-import { BehaviorSubject, fromEvent, merge } from 'rxjs';
-import { switchMap, tap, map } from 'rxjs/operators';
+
 
 type Item = {
   id: string;
@@ -28,7 +27,7 @@ const DragDropComponent: React.FC = () => {
   const [rightItems, setRightItems] = useState<Item[]>([]);
   const [attachedIds, setAttachedIds] = useState<string[]>([]);
   const [saveSuccess, setSaveSuccess] = useState(false);
-
+  
   useEffect(() => {
     const storedData = localStorage.getItem('dragDropData');
     if (storedData) {
@@ -64,7 +63,24 @@ const DragDropComponent: React.FC = () => {
   * @return {void}
   */
   const onDragEnd: OnDragEndResponder = (result) => {
-    document.dispatchEvent(new CustomEvent('dragend', { detail: result }));
+    if (!result.destination) return;
+
+    if (result.source.droppableId === 'rightTable' && result.destination.droppableId === 'leftTable') {
+      const draggedItem = rightItems[result.source.index];
+      
+      // Remove item from right table
+      const newRightItems = Array.from(rightItems);
+      newRightItems.splice(result.source.index, 1);
+      setRightItems(newRightItems);
+
+      // Add item to left table
+      const newLeftItems = Array.from(leftItems);
+      newLeftItems.splice(result.destination.index, 0, draggedItem);
+      setLeftItems(newLeftItems);
+
+      // Add ID to attachedIds
+      setAttachedIds(prev => [...prev, draggedItem.id]);
+    }
   };
 
   
@@ -89,7 +105,19 @@ const DragDropComponent: React.FC = () => {
   * @return {void} This function does not return anything.
   */
   const handleUndo = (index: number): void => {
-    document.dispatchEvent(new CustomEvent('undo', { detail: index }));
+    setAttachedIds(prev => {
+      const newAttachedIds = [...prev];
+      const removedId = newAttachedIds.splice(index, 1)[0];
+      
+      // Move item back to right table
+      const itemToMove = leftItems.find(item => item.id === removedId);
+      if (itemToMove) {
+        setLeftItems(prev => prev.filter(item => item.id !== removedId));
+        setRightItems(prev => [...prev, itemToMove]);
+      }
+
+      return newAttachedIds;
+    });
   };
 
   return (
@@ -121,11 +149,11 @@ const DragDropComponent: React.FC = () => {
         </div>
       )}
 
-      <DragDropContext onDragEnd={onDragEnd}>
+    <DragDropContext onDragEnd={onDragEnd}>
         <div className="flex flex-1 overflow-hidden">
           <div className="w-3/4 p-4 overflow-auto">
-            <Droppable droppableId="leftTable">
-              {(provided) => (
+        <Droppable droppableId="leftTable">
+          {(provided) => (
                 <div ref={provided.innerRef} {...provided.droppableProps} className="bg-white shadow rounded">
                   <table className="w-full">
                     <thead className="bg-indigo-700 text-white">
@@ -141,13 +169,13 @@ const DragDropComponent: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {leftItems.map((item, index) => (
-                        <Draggable key={item.id} draggableId={item.id} index={index}>
-                          {(provided) => (
+              {leftItems.map((item, index) => (
+                <Draggable key={item.id} draggableId={item.id} index={index}>
+                  {(provided) => (
                             <tr
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
                               className="border-b hover:bg-gray-100"
                             >
                               <td className="p-2">{index + 1}</td>
@@ -163,61 +191,61 @@ const DragDropComponent: React.FC = () => {
                               <td className="p-2">17/12/25</td>
                               <td className="p-2">-</td>
                             </tr>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
                     </tbody>
                   </table>
-                </div>
-                )}
-              </Droppable>
+            </div>
+          )}
+        </Droppable>
             </div>
             <div className="w-1/4 bg-gray-100 p-4 overflow-auto">
-              <Droppable droppableId="rightTable">
-                {(provided) => (
+        <Droppable droppableId="rightTable">
+          {(provided) => (
                   <div ref={provided.innerRef} {...provided.droppableProps} className="bg-white shadow rounded">
                     <table className="w-full">
                       <thead className="bg-indigo-700 text-white">
                         <tr>
-                          <th className="p-2 text-left">מספר</th>
-                          <th className="p-2 text-left">תיאור</th>
+                          <th className="p-2 text-left">Id</th>
+                          <th className="p-2 text-left">Description</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {rightItems.map((item, index) => (
-                          <Draggable key={item.id} draggableId={item.id} index={index}>
-                            {(provided) => (
+              {rightItems.map((item, index) => (
+                <Draggable key={item.id} draggableId={item.id} index={index}>
+                  {(provided) => (
                               <tr
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
                                 className="border-b hover:bg-gray-100"
                               >
                                 <td className="p-2">{item.id}</td>
                                 <td className="p-2">{item.description}</td>
                               </tr>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
                       </tbody>
                     </table>
-                  </div>
-                )}
-              </Droppable>
             </div>
+          )}
+        </Droppable>
+      </div>
         </div>
         {attachedIds.length && <div style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f0f0f0' }}>
-          <h3>Attached IDs:</h3>
+        <h3>Attached IDs:</h3>
           {attachedIds.map((id, index) => (
-            <div key={index}>
-              {id} <button onClick={() => handleUndo(index)}>Undo</button>
-            </div>
-          ))}
+          <div key={index}>
+            {id} <button onClick={() => handleUndo(index)}>Undo</button>
+          </div>
+        ))}
         </div>}
-        <button onClick={handleSave} style={{ marginTop: '10px' }}>Save</button>
-      </DragDropContext>
+      <button onClick={handleSave} style={{ marginTop: '10px' }}>Save</button>
+    </DragDropContext>
     </div>
   );
 };
