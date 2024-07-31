@@ -1,6 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, OnDragEndResponder } from '@hello-pangea/dnd';
 import axios from 'axios';
+import { BehaviorSubject, fromEvent, merge } from 'rxjs';
+import { switchMap, tap, map } from 'rxjs/operators';
 
 type Item = {
   id: string;
@@ -23,62 +26,86 @@ const DragDropComponent: React.FC = () => {
   const [rightItems, setRightItems] = useState<Item[]>([]);
   const [attachedIds, setAttachedIds] = useState<string[]>([]);
 
+  const state$ = new BehaviorSubject<ItemsResponse>({ leftItems: [], rightItems: [], attachedIds: [] });
+
   useEffect(() => {
-    fetchItems();
+    const fetchItems$ = axios.get<ItemsResponse>('http://localhost:3000/api/items');
+
+    const dragEnd$ = fromEvent<CustomEvent>(document, 'dragend').pipe(
+      map(event => event.detail),
+      tap(result => {
+        if (!result.destination) return;
+        if (result.source.droppableId === 'rightTable' && result.destination.droppableId === 'leftTable') {
+          const currentState = state$.getValue();
+          const draggedItem = currentState.rightItems[result.source.index];
+          
+          const newRightItems = currentState.rightItems.filter((_, index) => index !== result.source.index);
+          const newLeftItems = [
+            ...currentState.leftItems.slice(0, result.destination.index),
+            draggedItem,
+            ...currentState.leftItems.slice(result.destination.index)
+          ];
+          const newAttachedIds = [...currentState.attachedIds, draggedItem.id];
+
+          state$.next({ leftItems: newLeftItems, rightItems: newRightItems, attachedIds: newAttachedIds });
+        }
+      })
+    );
+
+    const undo$ = fromEvent<CustomEvent>(document, 'undo').pipe(
+      map(event => event.detail as number),
+      tap(index => {
+        const currentState = state$.getValue();
+        const newAttachedIds = currentState.attachedIds.filter((_, i) => i !== index);
+        const removedId = currentState.attachedIds[index];
+        const itemToMove = currentState.leftItems.find(item => item.id === removedId);
+        
+        if (itemToMove) {
+          const newLeftItems = currentState.leftItems.filter(item => item.id !== removedId);
+          const newRightItems = [...currentState.rightItems, itemToMove];
+
+          state$.next({ leftItems: newLeftItems, rightItems: newRightItems, attachedIds: newAttachedIds });
+        }
+      })
+    );
+
+    const save$ = fromEvent(document, 'save').pipe(
+      switchMap(() => {
+        const currentState = state$.getValue();
+        return axios.post('http://localhost:3000/api/save', currentState);
+      }),
+      tap(() => {
+        localStorage.setItem('dragDropData', JSON.stringify(state$.getValue()));
+      })
+    );
+
+    const subscription = merge(fetchItems$, dragEnd$, undo$, save$).subscribe({
+      next: (response) => {
+        if (response && 'data' in response) {
+          state$.next(response.data);
+        }
+      },
+      error: (error) => console.error('Error:', error)
+    });
+
+    state$.subscribe(state => {
+      setLeftItems(state.leftItems);
+      setRightItems(state.rightItems);
+      setAttachedIds(state.attachedIds);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const fetchItems = async () => {
-    try {
-      const response = await axios.get<ItemsResponse>('http://localhost:3000/api/items');
-      setLeftItems(response.data.leftItems);
-      setRightItems(response.data.rightItems);
-      setAttachedIds(response.data.attachedIds);
-    } catch (error) {
-      console.error('Error fetching items:', error);
-    }
-  };
 
-  /**
-  * Handles the end of a drag operation.
-  *
-  * @param {DragDropResult} result - The result of the drag operation.
-  * @return {void}
-  */
+  
   const onDragEnd: OnDragEndResponder = (result) => {
-    if (!result.destination) return;
-
-    if (result.source.droppableId === 'rightTable' && result.destination.droppableId === 'leftTable') {
-      const draggedItem = rightItems[result.source.index];
-      
-      // Remove item from right table
-      const newRightItems = Array.from(rightItems);
-      newRightItems.splice(result.source.index, 1);
-      setRightItems(newRightItems);
-
-      // Add item to left table
-      const newLeftItems = Array.from(leftItems);
-      newLeftItems.splice(result.destination.index, 0, draggedItem);
-      setLeftItems(newLeftItems);
-
-      // Add ID to attachedIds
-      setAttachedIds(prev => [...prev, draggedItem.id]);
-    }
+    document.dispatchEvent(new CustomEvent('dragend', { detail: result }));
   };
 
-  /**
-  * Saves the current state of the drag and drop component by making a POST request to the server
-  * and storing the data in local storage.
-  *
-  * @return {Promise<void>} - A promise that resolves when the data is successfully saved, or rejects
-  * with an error if there was an issue saving the data.
-  */
+  
   const handleSave = async () => {
-    try {
-      await axios.post('http://localhost:3000/save', { leftItems, rightItems, attachedIds });
-      localStorage.setItem('dragDropData', JSON.stringify({ leftItems, rightItems, attachedIds }));
-    } catch (error) {
-      console.error('Error saving data:', error);
-    }
+    document.dispatchEvent(new Event('save'));
   };
 
   /**
@@ -88,19 +115,7 @@ const DragDropComponent: React.FC = () => {
   * @return {void} This function does not return anything.
   */
   const handleUndo = (index: number): void => {
-    setAttachedIds(prev => {
-      const newAttachedIds = [...prev];
-      const removedId = newAttachedIds.splice(index, 1)[0];
-      
-      // Move item back to right table
-      const itemToMove = leftItems.find(item => item.id === removedId);
-      if (itemToMove) {
-        setLeftItems(prev => prev.filter(item => item.id !== removedId));
-        setRightItems(prev => [...prev, itemToMove]);
-      }
-
-      return newAttachedIds;
-    });
+    document.dispatchEvent(new CustomEvent('undo', { detail: index }));
   };
 
   return (
@@ -165,7 +180,7 @@ const DragDropComponent: React.FC = () => {
       </div>
       <div style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f0f0f0' }}>
         <h3>Attached IDs:</h3>
-        {attachedIds.map((id, index) => (
+        {attachedIds?.map((id, index) => (
           <div key={index}>
             {id} <button onClick={() => handleUndo(index)}>Undo</button>
           </div>
