@@ -69,7 +69,6 @@ const DragDropComponent: React.FC = (): JSX.Element => {
    * @return {void}
    */
   const onDragEnd: OnDragEndResponder = (result) => {
-    // debugger;
     if (!result.destination) return;
 
     if (
@@ -142,7 +141,7 @@ const DragDropComponent: React.FC = (): JSX.Element => {
       setRightItems(newRightItems);
     }
 
-    // Remove the last action from the undo stack (LIFO)
+    // Remove the last action from the undo stack
     setUndoStack(prev => prev.slice(0, -1));
   };
 
@@ -231,7 +230,7 @@ const DragDropComponent: React.FC = (): JSX.Element => {
 
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="flex flex-1 overflow-hidden">
-          <div className="w-3/4 p-4 overflow-auto">
+          <div className="w-2/3 p-4 overflow-auto">
             <Droppable droppableId="leftTable">
               {(provided) => (
                 <div
@@ -308,7 +307,8 @@ const DragDropComponent: React.FC = (): JSX.Element => {
                               <tr key={`child-${child.id}`} className="bg-gray-200">
                                 <td className="p-2">&nbsp;</td>
                                 <td className="p-2">{child.id}</td>
-                                <td className="p-2" colSpan={6}>&nbsp;</td>
+                                <td className="p-2">{child.description}</td>
+                                <td className="p-2" colSpan={5}>&nbsp;</td>
                               </tr>
                           ))}
                       </React.Fragment>  
@@ -320,7 +320,7 @@ const DragDropComponent: React.FC = (): JSX.Element => {
               )}
             </Droppable>
           </div>
-          <div className="w-1/4 bg-gray-100 p-4 overflow-auto">
+          <div className="w-1/3 bg-gray-100 p-4 overflow-auto">
             <Droppable droppableId="rightTable">
               {(provided) => (
                 <div
@@ -363,7 +363,7 @@ const DragDropComponent: React.FC = (): JSX.Element => {
             </Droppable>
           </div>
         </div>
-        <div className="flex justify-center">
+        <div className="flex justify-center buttons">
           {undoStack.length > 0 && (
           <button
             onClick={handleUndo}
