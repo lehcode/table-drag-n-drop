@@ -19,4 +19,6 @@
 Frontend is available at `http://localhost:4200`
 Backend is available at `http://localhost:3000`
 
-NOTE: Relaunch `yarn start-all` to reset backend state. Use DevTools to reset `localStorage`.
+- Use DevTools to reset `localStorage`; this will reset tables.
+- Although POST to backend exists and succeeds upon save, it is processed by the simplest controller & service using service class variable to store data.
+- Saved changes cannot be undone.
