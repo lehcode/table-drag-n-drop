@@ -4,12 +4,16 @@ export type Item = {
 }
 
 export type ItemsResponse = {
-  leftItems: ExtendedItem[],
+  leftItems: ParentItem[],
   rightItems: Item[],
-  predecessors: number[]
 }
 
-export interface ExtendedItem extends Item {
-  children: number[];
+export interface ParentItem extends Item {
+  predecessors: number[];
   isExpanded: boolean;
+}
+
+export type HistoryStep = {
+  parent: number | undefined;
+  child: number | undefined;
 }

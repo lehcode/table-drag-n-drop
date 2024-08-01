@@ -8,7 +8,7 @@ import {
   OnDragEndResponder,
 } from '@hello-pangea/dnd';
 import axios from 'axios';
-import { ExtendedItem, Item, ItemsResponse } from 'types';
+import { ParentItem, HistoryStep, Item, ItemsResponse } from 'types';
 
 /**
  * Renders a drag and drop component with two tables: left table and right table.
@@ -21,20 +21,21 @@ import { ExtendedItem, Item, ItemsResponse } from 'types';
  * @return {JSX.Element} The rendered drag and drop component.
  */
 const DragDropComponent: React.FC = (): JSX.Element => {
-  const [leftItems, setLeftItems] = useState<ExtendedItem[]>([]);
+  const [leftItems, setLeftItems] = useState<ParentItem[]>([]);
   const [rightItems, setRightItems] = useState<Item[]>([]);
-  const [predecessors, setPredecessors] = useState<number[]>([]);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [undoStack, setUndoStack] = useState<number[]>([]);
+  const [undoStack, setUndoStack] = useState<HistoryStep[]>([]);
 
   useEffect(() => {
     const storedData = localStorage.getItem('dragDropData');
     if (storedData) {
-      const { leftItems, rightItems, predecessors }: ItemsResponse =
+      console.log(storedData);
+
+      const { leftItems, rightItems }: ItemsResponse =
         JSON.parse(storedData);
+      
       setLeftItems(leftItems);
       setRightItems(rightItems);
-      setPredecessors(predecessors);
     } else {
       fetchItems();
     }
@@ -52,7 +53,7 @@ const DragDropComponent: React.FC = (): JSX.Element => {
       );
       setLeftItems(response.data.leftItems);
       setRightItems(response.data.rightItems);
-      setPredecessors(response.data.predecessors);
+      // setPredecessors(response.data.predecessors);
     } catch (error) {
       console.error('Error fetching items:', error);
     }
@@ -65,16 +66,13 @@ const DragDropComponent: React.FC = (): JSX.Element => {
    * @return {void}
    */
   const onDragEnd: OnDragEndResponder = (result) => {
-    debugger;
-    
+    // debugger;
     if (!result.destination) return;
 
     if (
       result.source.droppableId === 'rightTable' &&
       result.destination.droppableId === 'leftTable'
     ) {
-      const draggedItem = rightItems[result.source.index];
-
       // Remove item from right table
       const newRightItems = Array.from(rightItems);
       newRightItems.splice(result.source.index, 1);
@@ -82,26 +80,28 @@ const DragDropComponent: React.FC = (): JSX.Element => {
 
       // Add item to left table
       const newLeftItems = Array.from(leftItems);
-      // const parentIndex = result.destination.index;
       let parentIndex: number;
 
-      if (result.destination.index === (newLeftItems.length - 1)) {
-        parentIndex = newLeftItems.length;
-      } else {
-        parentIndex = result.destination.index;
+      // debugger;
+
+      parentIndex = result.destination.index - 1;
+      if (parentIndex === -1) {
+        parentIndex = 0;
       }
 
-      if (!newLeftItems[parentIndex].children) {
-        newLeftItems[parentIndex].children = [];
+      console.log("parentIndex: ", parentIndex);
+
+      if (!newLeftItems[parentIndex].predecessors) {
+        newLeftItems[parentIndex].predecessors = [];
       }
-      newLeftItems[parentIndex].children.push(draggedItem.id);
+
+      const draggedId = rightItems[result.source.index].id;
+      
+      newLeftItems[parentIndex].predecessors.push(draggedId);
       setLeftItems(newLeftItems);
 
       // Add to undo stack
-      setUndoStack(prev => [...prev, draggedItem.id]);
-
-      // Add ID to predecessors
-      setPredecessors(prev => [...prev, draggedItem.id]);
+      setUndoStack(prev => [...prev, {parent: parentIndex, child: draggedId}]);
     }
   };
 
@@ -112,7 +112,7 @@ const DragDropComponent: React.FC = (): JSX.Element => {
    * @return {Promise<void>} A promise that resolves when the save operation is complete.
    */
   const handleSave = async () => {
-    const data = { leftItems, rightItems, predecessors };
+    const data = { leftItems, rightItems };
     await axios.post('http://localhost:3000/api/save', data);
     localStorage.setItem('dragDropData', JSON.stringify(data));
     setSaveSuccess(true);
@@ -127,32 +127,37 @@ const DragDropComponent: React.FC = (): JSX.Element => {
    * @return {void}
    */
   const handleUndo = (index: unknown): void => {
-    debugger;
-    if (undoStack.length > 0) {
-      const itemId = undoStack[undoStack.length - 1];
-
-      // Find the item in the left table
-      const leftItemIndex = leftItems.findIndex(item => item.children?.includes(itemId));
-
-      if (leftItemIndex !== -1) {
-        const newLeftItems = [...leftItems];
-        
-        if (newLeftItems[leftItemIndex].children) {
-          newLeftItems[leftItemIndex].children = newLeftItems[leftItemIndex].children.filter(id => id !== itemId); 
-        }
-        
-        setLeftItems(newLeftItems);
-      }
-
-      const itemToMove = rightItems.find(item => item.id === itemId);
-
-      if (itemToMove) {
-        setRightItems(prev => [...prev, itemToMove]);
-      }
-
-      setPredecessors(prev => prev.filter(id => id !== itemId));
-      setUndoStack(prev => prev.slice(0, -1));
+    if (typeof index !== 'number') {
+      console.error('Invalid index type:', typeof index);
+      return;
     }
+
+    if (undoStack.length <= index) {
+      console.error('Invalid index:', index);
+      return;
+    }
+
+    debugger;
+
+    const parentIndex = undoStack[undoStack.length - 1].parent;
+
+    // Find the item in the left table
+    const leftItemIndex = leftItems.findIndex((item: ParentItem) => item.id === parentIndex);
+    console.log(leftItemIndex);
+
+    // if (leftItemIndex !== -1) {
+    //   const newLeftItems = [...leftItems];
+    //   newLeftItems[leftItemIndex].predecessors = newLeftItems[leftItemIndex].predecessors.filter(id => id !== parentIndex); 
+    //   setLeftItems(newLeftItems);
+    // }
+
+    // const itemToMove = rightItems.find(item => item.id === parentIndex);
+
+    // if (itemToMove) {
+    //   setRightItems(prev => [...prev, itemToMove]);
+    // }
+
+    // setUndoStack(prev => prev.slice(0, -1));
   };
 
   const toggleExpand = (index: number) => (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -308,9 +313,9 @@ const DragDropComponent: React.FC = (): JSX.Element => {
                                 </td>
                                 <td className="p-2">07/11/23</td>
                                 <td className="p-2">17/12/25</td>
-                                <td className="p-2">{item.children?.length && Number(item.children?.length)}</td>
+                                <td className="p-2">{item.predecessors?.length && Number(item.predecessors?.length)}</td>
                                 <td>
-                                  {item.children && item.children.length > 0 && (
+                                  {item.predecessors && item.predecessors.length > 0 && (
                                     <button onClick={toggleExpand(index)}>
                                       {item.isExpanded ? '▼' : '►'}
                                     </button>
@@ -319,7 +324,7 @@ const DragDropComponent: React.FC = (): JSX.Element => {
                               </tr>
                             )}
                           </Draggable>
-                          {item.isExpanded && item.children && item.children.map(childId => (
+                          {item.isExpanded && item.predecessors && item.predecessors.map(childId => (
                             <tr key={`child-${childId}`} className="bg-gray-200">
                               <td colSpan={8}>{childId}</td>
                             </tr>
@@ -376,24 +381,22 @@ const DragDropComponent: React.FC = (): JSX.Element => {
             </Droppable>
           </div>
         </div>
-        {undoStack.length > 0 && (
-          <div className="mt-4 p-4 bg-gray-200">
-            <h3>Undo Last Action:</h3>
-            <button
-              onClick={handleUndo}
-              className="bg-red-500 text-white px-2 py-1 rounded"
+        <div className="flex justify-center">
+          {undoStack.length > 0 && (
+          <button
+            onClick={handleUndo}
+            className="bg-red-500 text-white px-8 py-4 mr-4 text-lg rounded"
             >
               Undo
-            </button>
-          </div>
-        )}
-        <button
-          onClick={handleSave}
-          style={{ marginTop: '10px' }}
-          className="bg-indigo-500 text-white"
-        >
-          Save
-        </button>
+          </button>
+          )}
+          <button
+            onClick={handleSave}
+            className="bg-indigo-500 text-white px-8 py-4 text-lg rounded"
+          >
+            Save
+          </button>
+        </div>
       </DragDropContext>
     </div>
   );
