@@ -26,7 +26,7 @@ const DragDropComponent: React.FC = (): JSX.Element => {
   const [leftItems, setLeftItems] = useState<ParentItem[]>([]);
   const [rightItems, setRightItems] = useState<Item[]>([]);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [undoStack, setUndoStack] = useState<HistoryStep[]>([]);
+  const [undoStacks, setUndoStacks] = useState<{ [key: number]: HistoryStep[] }>({});
 
   useEffect(() => {
     const storedData = localStorage.getItem('dragDropData');
@@ -96,8 +96,14 @@ const DragDropComponent: React.FC = (): JSX.Element => {
       newLeftItems[parentIndex].predecessors.push(movedItem);
       setLeftItems(newLeftItems);
 
-      // Add to undo stack
-      setUndoStack(prev => [...prev, { parentIdx: parentIndex, childId: movedItem.id }]);
+      // Add to undo stack for the specific row
+      setUndoStacks(prev => ({
+        ...prev,
+        [newLeftItems[parentIndex].id]: [
+          ...(prev[newLeftItems[parentIndex].id] || []),
+          { parentIdx: parentIndex, childId: movedItem.id }
+        ]
+      }));
     }
   };
 
@@ -112,7 +118,7 @@ const DragDropComponent: React.FC = (): JSX.Element => {
     await axios.post('http://localhost:3000/api/save', data);
     localStorage.setItem('dragDropData', JSON.stringify(data));
     setSaveSuccess(true);
-    setUndoStack([]);
+    setUndoStacks({});
     setTimeout(() => setSaveSuccess(false), 3000);
   };
 
@@ -124,10 +130,11 @@ const DragDropComponent: React.FC = (): JSX.Element => {
    * @param {React.MouseEvent} event - The mouse event that triggered the undo operation.
    * @return {void}
    */
-  const handleUndo = (event: React.MouseEvent): void => {
-    if (undoStack.length === 0) return;
+  const handleUndo = (parentId: number) => (event: React.MouseEvent): void => {
+    event.stopPropagation();
+    if (!undoStacks[parentId] || undoStacks[parentId].length === 0) return;
 
-    const lastAction: HistoryStep = undoStack[undoStack.length - 1];
+    const lastAction: HistoryStep = undoStacks[parentId][undoStacks[parentId].length - 1];
     const { parentIdx, childId } = lastAction;
 
     const newLeftItems = [...leftItems];
@@ -141,11 +148,20 @@ const DragDropComponent: React.FC = (): JSX.Element => {
       setRightItems(newRightItems);
     }
 
-    // Remove the last action from the undo stack
-    setUndoStack(prev => prev.slice(0, -1));
+    // Remove the last action from the undo stack for this specific row
+    setUndoStacks(prev => ({
+      ...prev,
+      [parentId]: prev[parentId].slice(0, -1)
+    }));
   };
 
-  const toggleExpand = (index: number) => (event: React.MouseEvent) => {
+  /**
+   * Toggles the expansion state of an item at the specified index in the leftItems array.
+   *
+   * @param {number} index - The index of the item to toggle.
+   * @return {Function} A function that takes a React mouse event and updates the isExpanded state of the item at the specified index.
+   */
+  const toggleExpand = (index: number) => (event: React.MouseEvent): void => {
     event.stopPropagation();
     const newLeftItems = [...leftItems];
     newLeftItems[index].isExpanded = !newLeftItems[index].isExpanded;
@@ -243,12 +259,13 @@ const DragDropComponent: React.FC = (): JSX.Element => {
                       <tr>
                         <th className="p-2 text-left">#</th>
                         <th className="p-2 text-left">Id</th>
+                        <th className="p-2 text-left"></th>
                         <th className="p-2 text-left">Description</th>
                         <th className="p-2 text-center">Select</th>
                         <th className="p-2 text-center">Isolate</th>
                         <th className="p-2 text-left">Start Date</th>
                         <th className="p-2 text-left">End Date</th>
-                        <th className="p-2 text-left">Predecessors</th>
+                        <th className="p-2 text-center">Predecessors</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -268,7 +285,21 @@ const DragDropComponent: React.FC = (): JSX.Element => {
                               onClick={toggleExpand(index)}
                             >
                               <td className="p-2">{index + 1}</td>
-                              <td className="p-2">{item.id}</td>
+                              <td className="p-2 bg-gray-200">
+                                {item.isExpanded
+                                  ? ''
+                                  : item.predecessors.map(pred => pred.id).join(', ')}
+                              </td>
+                              <td className="p-2">
+                                {undoStacks[item.id] && undoStacks[item.id].length > 0 && (
+                                  <button
+                                    onClick={handleUndo(item.id)}
+                                    className="bg-red-500 text-white px-2 py-1 rounded text-sm"
+                                  >
+                                    Undo
+                                  </button>
+                                )}
+                              </td>
                               <td className="p-2">{item.description}</td>
                               <td className="p-2 text-center">
                                 <input type="checkbox" />
@@ -299,16 +330,16 @@ const DragDropComponent: React.FC = (): JSX.Element => {
                               </td>
                               <td className="p-2">07/11/23</td>
                               <td className="p-2">17/12/25</td>
-                              <td className="p-2">{item.predecessors.length}</td>
+                              <td className="p-2 text-center">-</td>
                             </tr>
                           )}
                           </Draggable>
                           {item.isExpanded && item.predecessors.map(child => (
-                              <tr key={`child-${child.id}`} className="bg-gray-200">
+                              <tr key={`child-${child.id}`} className="bg-indigo-100">
                                 <td className="p-2">&nbsp;</td>
                                 <td className="p-2">{child.id}</td>
                                 <td className="p-2">{child.description}</td>
-                                <td className="p-2" colSpan={5}>&nbsp;</td>
+                                <td className="p-2" colSpan={6}>&nbsp;</td>
                               </tr>
                           ))}
                       </React.Fragment>  
@@ -364,14 +395,6 @@ const DragDropComponent: React.FC = (): JSX.Element => {
           </div>
         </div>
         <div className="flex justify-center buttons">
-          {undoStack.length > 0 && (
-          <button
-            onClick={handleUndo}
-            className="bg-red-500 text-white px-8 py-4 mr-4 text-lg rounded"
-            >
-              Undo
-          </button>
-          )}
           <button
             onClick={handleSave}
             className="bg-indigo-500 text-white px-8 py-4 text-lg rounded"
@@ -380,6 +403,8 @@ const DragDropComponent: React.FC = (): JSX.Element => {
           </button>
         </div>
       </DragDropContext>
+
+      <div className="flex justify-center"></div>
     </div>
   );
 };
