@@ -9,11 +9,11 @@ export type ItemsResponse = {
 }
 
 export interface ParentItem extends Item {
-  predecessors: number[];
+  predecessors: Item[];
   isExpanded: boolean;
 }
 
 export type HistoryStep = {
-  parent: number | undefined;
-  child: number | undefined;
+  parentIdx: number;
+  childId: number;
 }

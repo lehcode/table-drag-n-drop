@@ -10,13 +10,15 @@ import {
 import axios from 'axios';
 import { ParentItem, HistoryStep, Item, ItemsResponse } from 'types';
 
+
 /**
- * Renders a drag and drop component with two tables: left table and right table.
- * The component allows users to drag items from the left table to the right table.
- * The dragged items are added to the predecessors list.
- * The component also allows users to undo the last drag operation by removing an item from the predecessors list.
- * The component saves the leftItems, rightItems, and predecessors to the local storage when the save button is clicked.
- * The component displays a success message for 3 seconds after a successful save.
+ * Renders a drag and drop component with two tables, one on the left and one on the right.
+ * The left table contains items with their properties and a list of predecessors.
+ * The right table contains items without predecessors.
+ * The user can drag items from the right table to the left table and vice versa.
+ * The items in the left table can be expanded to show their predecessors.
+ * The user can undo drag operations.
+ * The user can save the current state of the drag and drop component.
  *
  * @return {JSX.Element} The rendered drag and drop component.
  */
@@ -29,11 +31,11 @@ const DragDropComponent: React.FC = (): JSX.Element => {
   useEffect(() => {
     const storedData = localStorage.getItem('dragDropData');
     if (storedData) {
-      console.log(storedData);
+      console.log(JSON.parse(storedData));
 
       const { leftItems, rightItems }: ItemsResponse =
         JSON.parse(storedData);
-      
+
       setLeftItems(leftItems);
       setRightItems(rightItems);
     } else {
@@ -41,6 +43,7 @@ const DragDropComponent: React.FC = (): JSX.Element => {
     }
   }, []);
 
+  
   /**
    * Fetches items from the server and updates the component state with the response data.
    *
@@ -53,12 +56,12 @@ const DragDropComponent: React.FC = (): JSX.Element => {
       );
       setLeftItems(response.data.leftItems);
       setRightItems(response.data.rightItems);
-      // setPredecessors(response.data.predecessors);
     } catch (error) {
       console.error('Error fetching items:', error);
     }
   };
 
+  
   /**
    * Handles the drag end event and updates the state based on the drag result.
    *
@@ -75,33 +78,27 @@ const DragDropComponent: React.FC = (): JSX.Element => {
     ) {
       // Remove item from right table
       const newRightItems = Array.from(rightItems);
-      newRightItems.splice(result.source.index, 1);
+      const [movedItem] = newRightItems.splice(result.source.index, 1);
       setRightItems(newRightItems);
 
       // Add item to left table
       const newLeftItems = Array.from(leftItems);
-      let parentIndex: number;
-
-      // debugger;
+      let parentIndex = result.destination.index - 1;
 
       parentIndex = result.destination.index - 1;
       if (parentIndex === -1) {
         parentIndex = 0;
       }
 
-      console.log("parentIndex: ", parentIndex);
-
       if (!newLeftItems[parentIndex].predecessors) {
         newLeftItems[parentIndex].predecessors = [];
       }
-
-      const draggedId = rightItems[result.source.index].id;
       
-      newLeftItems[parentIndex].predecessors.push(draggedId);
+      newLeftItems[parentIndex].predecessors.push(movedItem);
       setLeftItems(newLeftItems);
 
       // Add to undo stack
-      setUndoStack(prev => [...prev, {parent: parentIndex, child: draggedId}]);
+      setUndoStack(prev => [...prev, { parentIdx: parentIndex, childId: movedItem.id }]);
     }
   };
 
@@ -116,56 +113,45 @@ const DragDropComponent: React.FC = (): JSX.Element => {
     await axios.post('http://localhost:3000/api/save', data);
     localStorage.setItem('dragDropData', JSON.stringify(data));
     setSaveSuccess(true);
+    setUndoStack([]);
     setTimeout(() => setSaveSuccess(false), 3000);
   };
 
+  
   /**
    * Handles the undo operation for removing an item from the attached IDs list.
    * Moves the item back to the right table if it exists in the left table.
    *
-   * @param {number} index - The index of the item to be undone.
+   * @param {React.MouseEvent} event - The mouse event that triggered the undo operation.
    * @return {void}
    */
-  const handleUndo = (index: unknown): void => {
-    if (typeof index !== 'number') {
-      console.error('Invalid index type:', typeof index);
-      return;
+  const handleUndo = (event: React.MouseEvent): void => {
+    if (undoStack.length === 0) return;
+
+    const lastAction: HistoryStep = undoStack[undoStack.length - 1];
+    const { parentIdx, childId } = lastAction;
+
+    const newLeftItems = [...leftItems];
+    const parentItem = newLeftItems[parentIdx];
+    const childItemIndex = parentItem.predecessors.findIndex(pred => pred.id === childId);
+
+    if (childItemIndex !== -1) {
+      const [movedItem] = parentItem.predecessors.splice(childItemIndex, 1);
+      setLeftItems(newLeftItems);
+      const newRightItems = [...rightItems, movedItem].sort((a, b) => a.id - b.id);
+      setRightItems(newRightItems);
     }
 
-    if (undoStack.length <= index) {
-      console.error('Invalid index:', index);
-      return;
-    }
-
-    debugger;
-
-    const parentIndex = undoStack[undoStack.length - 1].parent;
-
-    // Find the item in the left table
-    const leftItemIndex = leftItems.findIndex((item: ParentItem) => item.id === parentIndex);
-    console.log(leftItemIndex);
-
-    // if (leftItemIndex !== -1) {
-    //   const newLeftItems = [...leftItems];
-    //   newLeftItems[leftItemIndex].predecessors = newLeftItems[leftItemIndex].predecessors.filter(id => id !== parentIndex); 
-    //   setLeftItems(newLeftItems);
-    // }
-
-    // const itemToMove = rightItems.find(item => item.id === parentIndex);
-
-    // if (itemToMove) {
-    //   setRightItems(prev => [...prev, itemToMove]);
-    // }
-
-    // setUndoStack(prev => prev.slice(0, -1));
+    // Remove the last action from the undo stack (LIFO)
+    setUndoStack(prev => prev.slice(0, -1));
   };
 
-  const toggleExpand = (index: number) => (event: React.MouseEvent<HTMLButtonElement>) => {
-  event.stopPropagation();
-  const newLeftItems = [...leftItems];
-  newLeftItems[index].isExpanded = !newLeftItems[index].isExpanded;
-  setLeftItems(newLeftItems);
-};
+  const toggleExpand = (index: number) => (event: React.MouseEvent) => {
+    event.stopPropagation();
+    const newLeftItems = [...leftItems];
+    newLeftItems[index].isExpanded = !newLeftItems[index].isExpanded;
+    setLeftItems(newLeftItems);
+  };
 
   return (
     <div className="flex flex-col h-screen">
@@ -263,7 +249,7 @@ const DragDropComponent: React.FC = (): JSX.Element => {
                         <th className="p-2 text-center">Isolate</th>
                         <th className="p-2 text-left">Start Date</th>
                         <th className="p-2 text-left">End Date</th>
-                        <th className="p-2 text-left">Predecessors N.</th>
+                        <th className="p-2 text-left">Predecessors</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -275,59 +261,55 @@ const DragDropComponent: React.FC = (): JSX.Element => {
                             index={index}
                           >
                             {(provided) => (
-                              <tr
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className="border-b hover:bg-gray-100"
-                              >
-                                <td className="p-2">{index + 1}</td>
-                                <td className="p-2">{item.id}</td>
-                                <td className="p-2">{item.description}</td>
-                                <td className="p-2 text-center">
-                                  <input type="checkbox" />
-                                </td>
-                                <td className="p-2 text-center">
-                                  <button className="text-gray-600 hover:text-gray-800">
-                                    <svg
-                                      className="w-5 h-5"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      viewBox="0 0 24 24"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                      />
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                      />
-                                    </svg>
-                                  </button>
-                                </td>
-                                <td className="p-2">07/11/23</td>
-                                <td className="p-2">17/12/25</td>
-                                <td className="p-2">{item.predecessors?.length && Number(item.predecessors?.length)}</td>
-                                <td>
-                                  {item.predecessors && item.predecessors.length > 0 && (
-                                    <button onClick={toggleExpand(index)}>
-                                      {item.isExpanded ? '▼' : '►'}
-                                    </button>
-                                  )}
-                                </td>
-                              </tr>
-                            )}
-                          </Draggable>
-                          {item.isExpanded && item.predecessors && item.predecessors.map(childId => (
-                            <tr key={`child-${childId}`} className="bg-gray-200">
-                              <td colSpan={8}>{childId}</td>
+                            <tr
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className="border-b hover:bg-gray-100"
+                              onClick={toggleExpand(index)}
+                            >
+                              <td className="p-2">{index + 1}</td>
+                              <td className="p-2">{item.id}</td>
+                              <td className="p-2">{item.description}</td>
+                              <td className="p-2 text-center">
+                                <input type="checkbox" />
+                              </td>
+                              <td className="p-2 text-center">
+                                <button className="text-gray-600 hover:text-gray-800">
+                                  <svg
+                                    className="w-5 h-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                    />
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                    />
+                                  </svg>
+                                </button>
+                              </td>
+                              <td className="p-2">07/11/23</td>
+                              <td className="p-2">17/12/25</td>
+                              <td className="p-2">{item.predecessors.length}</td>
                             </tr>
+                          )}
+                          </Draggable>
+                          {item.isExpanded && item.predecessors.map(child => (
+                              <tr key={`child-${child.id}`} className="bg-gray-200">
+                                <td className="p-2">&nbsp;</td>
+                                <td className="p-2">{child.id}</td>
+                                <td className="p-2" colSpan={6}>&nbsp;</td>
+                              </tr>
                           ))}
                       </React.Fragment>  
                       ))}

@@ -10,6 +10,7 @@ export class AppService {
   private leftItems: ParentItem[] = baseArr.map((_, idx) => ({
     id: idx + 1,
     description: customFaker.lorem.words({min: 1, max: 3}),
+    predecessors: [],
     isExpanded: false
   }));
 

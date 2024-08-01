@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+[data-rfd-droppable-id="rightTable"] tbody tr {
+  cursor: move;
+}
+
+[data-rfd-droppable-id="leftTable"] tbody tr {
+  cursor: pointer;
+}
