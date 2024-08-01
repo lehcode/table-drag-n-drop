@@ -8,3 +8,8 @@ export type ItemsResponse = {
   rightItems: Item[],
   attachedIds: number[]
 }
+
+export interface ExtendedItem extends Item {
+  children?: number[];
+  isExpanded?: boolean;
+}
