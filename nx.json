@@ -26,6 +26,9 @@
       "cache": true,
       "dependsOn": ["^build"],
       "inputs": ["default", "^default"]
+    },
+    "test": {
+      "cache": true
     }
   },
   "defaultBase": "master",
@@ -58,7 +61,7 @@
       "options": {
         "targetName": "test"
       },
-      "exclude": ["backend-e2e/**/*"]
+      "exclude": ["front-e2e/**/*", "backend-e2e/**/*"]
     }
   ],
   "generators": {
