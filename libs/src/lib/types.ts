@@ -4,12 +4,12 @@ export type Item = {
 }
 
 export type ItemsResponse = {
-  leftItems: Item[],
+  leftItems: ExtendedItem[],
   rightItems: Item[],
-  attachedIds: number[]
+  predecessors: number[]
 }
 
 export interface ExtendedItem extends Item {
-  children?: number[];
-  isExpanded?: boolean;
+  children: number[];
+  isExpanded: boolean;
 }

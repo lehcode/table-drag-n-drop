@@ -1,3 +1,4 @@
+/* eslint-disable no-debugger */
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from 'react';
 import {
@@ -7,32 +8,33 @@ import {
   OnDragEndResponder,
 } from '@hello-pangea/dnd';
 import axios from 'axios';
-import { Item, ItemsResponse } from 'types';
+import { ExtendedItem, Item, ItemsResponse } from 'types';
 
 /**
  * Renders a drag and drop component with two tables: left table and right table.
  * The component allows users to drag items from the left table to the right table.
- * The dragged items are added to the attachedIds list.
- * The component also allows users to undo the last drag operation by removing an item from the attachedIds list.
- * The component saves the leftItems, rightItems, and attachedIds to the local storage when the save button is clicked.
+ * The dragged items are added to the predecessors list.
+ * The component also allows users to undo the last drag operation by removing an item from the predecessors list.
+ * The component saves the leftItems, rightItems, and predecessors to the local storage when the save button is clicked.
  * The component displays a success message for 3 seconds after a successful save.
  *
  * @return {JSX.Element} The rendered drag and drop component.
  */
-const DragDropComponent: React.FC = () => {
-  const [leftItems, setLeftItems] = useState<Item[]>([]);
+const DragDropComponent: React.FC = (): JSX.Element => {
+  const [leftItems, setLeftItems] = useState<ExtendedItem[]>([]);
   const [rightItems, setRightItems] = useState<Item[]>([]);
-  const [attachedIds, setAttachedIds] = useState<number[]>([]);
+  const [predecessors, setPredecessors] = useState<number[]>([]);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [undoStack, setUndoStack] = useState<number[]>([]);
 
   useEffect(() => {
     const storedData = localStorage.getItem('dragDropData');
     if (storedData) {
-      const { leftItems, rightItems, attachedIds }: ItemsResponse =
+      const { leftItems, rightItems, predecessors }: ItemsResponse =
         JSON.parse(storedData);
       setLeftItems(leftItems);
       setRightItems(rightItems);
-      setAttachedIds(attachedIds);
+      setPredecessors(predecessors);
     } else {
       fetchItems();
     }
@@ -50,7 +52,7 @@ const DragDropComponent: React.FC = () => {
       );
       setLeftItems(response.data.leftItems);
       setRightItems(response.data.rightItems);
-      setAttachedIds(response.data.attachedIds);
+      setPredecessors(response.data.predecessors);
     } catch (error) {
       console.error('Error fetching items:', error);
     }
@@ -63,6 +65,8 @@ const DragDropComponent: React.FC = () => {
    * @return {void}
    */
   const onDragEnd: OnDragEndResponder = (result) => {
+    debugger;
+    
     if (!result.destination) return;
 
     if (
@@ -78,11 +82,26 @@ const DragDropComponent: React.FC = () => {
 
       // Add item to left table
       const newLeftItems = Array.from(leftItems);
-      newLeftItems.splice(result.destination.index, 0, draggedItem);
+      // const parentIndex = result.destination.index;
+      let parentIndex: number;
+
+      if (result.destination.index === (newLeftItems.length - 1)) {
+        parentIndex = newLeftItems.length;
+      } else {
+        parentIndex = result.destination.index;
+      }
+
+      if (!newLeftItems[parentIndex].children) {
+        newLeftItems[parentIndex].children = [];
+      }
+      newLeftItems[parentIndex].children.push(draggedItem.id);
       setLeftItems(newLeftItems);
 
-      // Add ID to attachedIds
-      setAttachedIds((prev) => [...prev, draggedItem.id]);
+      // Add to undo stack
+      setUndoStack(prev => [...prev, draggedItem.id]);
+
+      // Add ID to predecessors
+      setPredecessors(prev => [...prev, draggedItem.id]);
     }
   };
 
@@ -93,7 +112,7 @@ const DragDropComponent: React.FC = () => {
    * @return {Promise<void>} A promise that resolves when the save operation is complete.
    */
   const handleSave = async () => {
-    const data = { leftItems, rightItems, attachedIds };
+    const data = { leftItems, rightItems, predecessors };
     await axios.post('http://localhost:3000/api/save', data);
     localStorage.setItem('dragDropData', JSON.stringify(data));
     setSaveSuccess(true);
@@ -107,21 +126,41 @@ const DragDropComponent: React.FC = () => {
    * @param {number} index - The index of the item to be undone.
    * @return {void}
    */
-  const handleUndo = (index: number): void => {
-    setAttachedIds((prev) => {
-      const newAttachedIds = [...prev];
-      const removedId = newAttachedIds.splice(index, 1)[0];
+  const handleUndo = (index: unknown): void => {
+    debugger;
+    if (undoStack.length > 0) {
+      const itemId = undoStack[undoStack.length - 1];
 
-      // Move item back to right table
-      const itemToMove = leftItems.find((item) => item.id === removedId);
-      if (itemToMove) {
-        setLeftItems((prev) => prev.filter((item) => item.id !== removedId));
-        setRightItems((prev) => [...prev, itemToMove]);
+      // Find the item in the left table
+      const leftItemIndex = leftItems.findIndex(item => item.children?.includes(itemId));
+
+      if (leftItemIndex !== -1) {
+        const newLeftItems = [...leftItems];
+        
+        if (newLeftItems[leftItemIndex].children) {
+          newLeftItems[leftItemIndex].children = newLeftItems[leftItemIndex].children.filter(id => id !== itemId); 
+        }
+        
+        setLeftItems(newLeftItems);
       }
 
-      return newAttachedIds;
-    });
+      const itemToMove = rightItems.find(item => item.id === itemId);
+
+      if (itemToMove) {
+        setRightItems(prev => [...prev, itemToMove]);
+      }
+
+      setPredecessors(prev => prev.filter(id => id !== itemId));
+      setUndoStack(prev => prev.slice(0, -1));
+    }
   };
+
+  const toggleExpand = (index: number) => (event: React.MouseEvent<HTMLButtonElement>) => {
+  event.stopPropagation();
+  const newLeftItems = [...leftItems];
+  newLeftItems[index].isExpanded = !newLeftItems[index].isExpanded;
+  setLeftItems(newLeftItems);
+};
 
   return (
     <div className="flex flex-col h-screen">
@@ -224,54 +263,68 @@ const DragDropComponent: React.FC = () => {
                     </thead>
                     <tbody>
                       {leftItems.map((item, index) => (
-                        <Draggable
-                          key={item.id}
-                          draggableId={item.id.toString()}
-                          index={index}
-                        >
-                          {(provided) => (
-                            <tr
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              className="border-b hover:bg-gray-100"
-                            >
-                              <td className="p-2">{index + 1}</td>
-                              <td className="p-2">{item.id}</td>
-                              <td className="p-2">{item.description}</td>
-                              <td className="p-2 text-center">
-                                <input type="checkbox" />
-                              </td>
-                              <td className="p-2 text-center">
-                                <button className="text-gray-600 hover:text-gray-800">
-                                  <svg
-                                    className="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                    />
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                    />
-                                  </svg>
-                                </button>
-                              </td>
-                              <td className="p-2">07/11/23</td>
-                              <td className="p-2">17/12/25</td>
-                              <td className="p-2">-</td>
+                        <React.Fragment key={item.id}>
+                          <Draggable
+                            key={item.id}
+                            draggableId={item.id.toString()}
+                            index={index}
+                          >
+                            {(provided) => (
+                              <tr
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className="border-b hover:bg-gray-100"
+                              >
+                                <td className="p-2">{index + 1}</td>
+                                <td className="p-2">{item.id}</td>
+                                <td className="p-2">{item.description}</td>
+                                <td className="p-2 text-center">
+                                  <input type="checkbox" />
+                                </td>
+                                <td className="p-2 text-center">
+                                  <button className="text-gray-600 hover:text-gray-800">
+                                    <svg
+                                      className="w-5 h-5"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                      />
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                      />
+                                    </svg>
+                                  </button>
+                                </td>
+                                <td className="p-2">07/11/23</td>
+                                <td className="p-2">17/12/25</td>
+                                <td className="p-2">{item.children?.length && Number(item.children?.length)}</td>
+                                <td>
+                                  {item.children && item.children.length > 0 && (
+                                    <button onClick={toggleExpand(index)}>
+                                      {item.isExpanded ? '▼' : '►'}
+                                    </button>
+                                  )}
+                                </td>
+                              </tr>
+                            )}
+                          </Draggable>
+                          {item.isExpanded && item.children && item.children.map(childId => (
+                            <tr key={`child-${childId}`} className="bg-gray-200">
+                              <td colSpan={8}>{childId}</td>
                             </tr>
-                          )}
-                        </Draggable>
+                          ))}
+                      </React.Fragment>  
                       ))}
                       {provided.placeholder}
                     </tbody>
@@ -323,26 +376,15 @@ const DragDropComponent: React.FC = () => {
             </Droppable>
           </div>
         </div>
-        {attachedIds.length > 0 && (
-          <div
-            style={{
-              marginTop: '20px',
-              padding: '10px',
-              backgroundColor: '#f0f0f0',
-            }}
-          >
-            <h3>Attached IDs:</h3>
-            {attachedIds.map((id, index) => (
-              <div key={index}>
-                {id}{' '}
-                <button
-                  onClick={() => handleUndo(index)}
-                  className="bg-red-500 text-white px-2 py-1 rounded"
-                >
-                  Undo
-                </button>
-              </div>
-            ))}
+        {undoStack.length > 0 && (
+          <div className="mt-4 p-4 bg-gray-200">
+            <h3>Undo Last Action:</h3>
+            <button
+              onClick={handleUndo}
+              className="bg-red-500 text-white px-2 py-1 rounded"
+            >
+              Undo
+            </button>
           </div>
         )}
         <button

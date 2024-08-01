@@ -16,14 +16,14 @@ export class AppController {
   }
 
   /**
-   * Saves the attachedIds data to the app service.
+   * Saves the predecessors data to the app service.
    *
-   * @param {Object} data - The data object containing the attachedIds.
-   * @param {number[]} data.attachedIds - An array of numbers representing the attachedIds.
-   * @return {Promise<any>} A promise that resolves with the result of saving the attachedIds.
+   * @param {Object} data - The data object containing the predecessors.
+   * @param {number[]} data.predecessors - An array of numbers representing the predecessors.
+   * @return {Promise<any>} A promise that resolves with the result of saving the predecessors.
    */
   @Post('save')
-  saveAttachedIds(@Body() data: { attachedIds: number[] }) {
-    return this.appService.saveAttachedIds(data.attachedIds);
+  saveAttachedIds(@Body() data: { predecessors: number[] }) {
+    return this.appService.saveAttachedIds(data.predecessors);
   }
 }
