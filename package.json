@@ -4,13 +4,12 @@
   "private": true,
   "scripts": {
     "typecheck": "tsc",
-    "build": "vite build",
-    "build-all": "nx run-many --target=build --projects=front,backend --parallel=true --output-style=static --skipNxCache",
-    "build-api": "nx run backend:build --skipNxCache",
-    "build-front": "nx build front:build --skipNxCache",
+    "build-ci-all": "nx run-many --target=build --projects=front,backend --parallel=true --skipNxCache",
+    "build-ci-api": "npx nx run backend:build:production --skipNxCache",
+    "build-ci-front": "npx nx build front:build:production --skipNxCache",
     "start-api": "nx run backend:serve",
     "start-front": "nx run front:serve",
-    "start-all": "nx run-many --target=serve --projects=front,backend --parallel=true --output-style=dynamic",
+    "start-all": "nx run-many --target=serve --projects=front,backend --parallel=true",
     "test-front": "nx run front:test"
   },
   "dependencies": {
@@ -81,5 +80,6 @@
     "typescript": "~5.5.2",
     "vite": "^5.3.5",
     "webpack-cli": "^5.1.4"
-  }
+  },
+  "packageManager": "yarn@1.22.22"
 }
