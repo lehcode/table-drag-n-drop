@@ -4,23 +4,5 @@
   "sourceRoot": "backend/src",
   "projectType": "application",
   "tags": [],
-  "targets": {
-    "serve": {
-      "executor": "@nx/js:node",
-      "defaultConfiguration": "development",
-      "dependsOn": ["build"],
-      "options": {
-        "buildTarget": "backend:build",
-        "runBuildTargetDependencies": false
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "backend:build:development"
-        },
-        "production": {
-          "buildTarget": "backend:build:production"
-        }
-      }
-    }
-  }
+  "targets": {}
 }

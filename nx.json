@@ -9,13 +9,18 @@
     },
     "serve": {
       "executor": "@nx/js:node",
-      "options": {
-        "buildTarget": "fetcher:build"
-      },
       "defaultConfiguration": "development",
+      "dependsOn": ["build"],
+      "options": {
+        "buildTarget": "front:build",
+        "runBuildTargetDependencies": false
+      },
       "configurations": {
         "development": {
-          "buildTarget": "fetcher:build:development"
+          "buildTarget": "front:build:development"
+        },
+        "production": {
+          "buildTarget": "front:build:production"
         }
       }
     },

@@ -5,14 +5,13 @@
   "scripts": {
     "typecheck": "tsc",
     "build": "vite build",
-    "build-all": "nx run-many --target=build --projects=front,backend --parallel=true",
-    "build-api": "nx build backend",
-    "build-front": "nx build front",
-    "serve": "vite --host 0.0.0.0",
-    "start-api": "nx serve --project=backend --target=serve",
-    "start-front": "nx serve --project=front --target=serve",
-    "start-all": "nx run-many --target=serve --projects=front,backend --parallel=true",
-    "test-front": "nx test --projects=front"
+    "build-all": "nx run-many --target=build --projects=front,backend --parallel=true --output-style=static --skipNxCache",
+    "build-api": "nx run backend:build --skipNxCache",
+    "build-front": "nx build front:build --skipNxCache",
+    "start-api": "nx run backend:serve",
+    "start-front": "nx run front:serve",
+    "start-all": "nx run-many --target=serve --projects=front,backend --parallel=true --output-style=dynamic",
+    "test-front": "nx run front:test"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^16.6.0",
