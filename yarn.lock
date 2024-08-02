@@ -3105,13 +3105,6 @@
   resolved "https://registry.yarnpkg.com/@types/range-parser/-/range-parser-1.2.7.tgz#50ae4353eaaddc04044279812f52c8c65857dbcb"
   integrity sha512-hKormJbkJqzQGhziax5PItDUTMAM9uE2XXQmM37dyd4hVM+5aVl7oVxMVUiVQn2oCQFN/LKCZdvSM0pFRqbSmQ==
 
-"@types/react-beautiful-dnd@^13.1.8":
-  version "13.1.8"
-  resolved "https://registry.yarnpkg.com/@types/react-beautiful-dnd/-/react-beautiful-dnd-13.1.8.tgz#f52d3ea07e1e19159d6c3c4a48c8da3d855e60b4"
-  integrity sha512-E3TyFsro9pQuK4r8S/OL6G99eq7p8v29sX0PM7oT8Z+PJfZvSQTx4zTQbUJ+QZXioAF0e7TGBEcA1XhYhCweyQ==
-  dependencies:
-    "@types/react" "*"
-
 "@types/react-dom@18.3.0", "@types/react-dom@^18.0.0":
   version "18.3.0"
   resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-18.3.0.tgz#0cbc818755d87066ab6ca74fbedb2547d74a82b0"
@@ -8225,7 +8218,7 @@ nx@19.5.4:
     "@nx/nx-win32-arm64-msvc" "19.5.4"
     "@nx/nx-win32-x64-msvc" "19.5.4"
 
-nx@19.5.6:
+nx@19.5.6, nx@^19.5.6:
   version "19.5.6"
   resolved "https://registry.yarnpkg.com/nx/-/nx-19.5.6.tgz#5dd004590e9b78e672f72f2d0aa28fd8f4543f53"
   integrity sha512-qjP17aa5ViXSpo0bDgJ7O3b8EY/0+PbX7ZIKvG1g6qasohtfM1y4Sx2bbSow0zCKU0+r1LnR53Q0lyX4OOgtUg==
