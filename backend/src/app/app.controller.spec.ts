@@ -19,7 +19,7 @@ describe('AppController', () => {
       getItems: jest.fn().mockResolvedValue({
         leftItems: [],
         rightItems: [],
-        attachedIds: [],
+        predecessors: [],
       }),
     };
 
@@ -29,7 +29,7 @@ describe('AppController', () => {
     expect(result).resolves.toEqual({
       leftItems: [],
       rightItems: [],
-      attachedIds: [],
+      predecessors: [],
     });
   });
 

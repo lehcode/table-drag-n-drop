@@ -14,7 +14,7 @@ describe('AppService', () => {
   });
 
   describe('getItems', () => {
-    it('should return correct object when leftItems, rightItems, and attachedIds have values', () => {
+    it('should return correct object when leftItems, rightItems, and predecessors have values', () => {
     const expectedResult = {
       leftItems: [
         { id: '1', description: 'Item 1' },
@@ -24,7 +24,7 @@ describe('AppService', () => {
         { id: '3', description: 'Item 3' },
         { id: '4', description: 'Item 4' },
       ],
-      attachedIds: [],
+      predecessors: [],
     };
     expect(service.getItems()).toEqual(expectedResult);
   });
