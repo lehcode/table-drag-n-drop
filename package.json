@@ -5,10 +5,14 @@
   "scripts": {
     "typecheck": "tsc",
     "build": "vite build",
-    "build-all": "nx run-many --target=build",
+    "build-all": "nx run-many --target=build --projects=front,backend --parallel=true",
+    "build-api": "nx build backend",
+    "build-front": "nx build front",
     "serve": "vite --host 0.0.0.0",
+    "start-api": "nx serve --project=backend --target=serve",
+    "start-front": "nx serve --project=front --target=serve",
     "start-all": "nx run-many --target=serve --projects=front,backend --parallel=true",
-    "test-front": "nx test front"
+    "test-front": "nx test --projects=front"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^16.6.0",
