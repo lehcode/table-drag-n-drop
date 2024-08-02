@@ -338,8 +338,9 @@ const DragDropComponent: React.FC = (): JSX.Element => {
                               <tr key={`child-${child.id}`} className="bg-indigo-100">
                                 <td className="p-2">&nbsp;</td>
                                 <td className="p-2">{child.id}</td>
+                                <td className="p-2">&nbsp;</td>
                                 <td className="p-2">{child.description}</td>
-                                <td className="p-2" colSpan={6}>&nbsp;</td>
+                                <td className="p-2" colSpan={5}>&nbsp;</td>
                               </tr>
                           ))}
                       </React.Fragment>  
