@@ -3,7 +3,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
-
 describe('AppController', () => {
   let app: TestingModule;
 
@@ -14,24 +13,10 @@ describe('AppController', () => {
     }).compile();
   });
 
-  it('should return an empty array when no items are available', () => {
-    const mockAppService = {
-      getItems: jest.fn().mockResolvedValue({
-        leftItems: [],
-        rightItems: [],
-        predecessors: [],
-      }),
-    };
-
-    const appController = new AppController(mockAppService as unknown as AppService);
-    const result = appController.getItems();
-
-    expect(result).resolves.toEqual({
-      leftItems: [],
-      rightItems: [],
-      predecessors: [],
+  describe('getData', () => {
+    it('should return "Hello API"', () => {
+      const appController = app.get<AppController>(AppController);
+      expect(appController.getData()).toEqual({ message: 'Hello API' });
     });
   });
-
-  
 });

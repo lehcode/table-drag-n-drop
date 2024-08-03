@@ -67,7 +67,13 @@
       "options": {
         "targetName": "test"
       },
-      "exclude": ["{workspaceRoot}/front-e2e/**/*", "{workspaceRoot}/backend-e2e/**/*"]
+      "exclude": [
+        "front-e2e/**/*",
+        "backend-e2e/**/*",
+        "api-e2e/**/*",
+        "api-e2e/**/*",
+        "backend-e2e/**/*"
+      ]
     }
   ],
   "generators": {

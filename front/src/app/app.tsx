@@ -2,7 +2,6 @@
 import styles from './app.module.css';
 import DragDropComponent from './drag-drop';
 
-
 export function App() {
   return (
     <div>

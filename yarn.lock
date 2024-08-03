@@ -1862,13 +1862,6 @@
   dependencies:
     "@nx/jest" "19.5.4"
 
-"@nrwl/jest@19.5.6":
-  version "19.5.6"
-  resolved "https://registry.yarnpkg.com/@nrwl/jest/-/jest-19.5.6.tgz#3ffe40893a4b02180710d460fda49b9a24e20a7e"
-  integrity sha512-/redyU+er4f0xjLgWttdyOZw0yOozGzwDuUWYu0vR9SCmKXyhQf3kUHw6yR3/qOLiN32VbzAmiq67NvGhoRgFw==
-  dependencies:
-    "@nx/jest" "19.5.6"
-
 "@nrwl/js@19.5.4":
   version "19.5.4"
   resolved "https://registry.yarnpkg.com/@nrwl/js/-/js-19.5.4.tgz#be388b3ce9b75117fb57d06e4f24f42861e02459"
@@ -1883,12 +1876,12 @@
   dependencies:
     "@nx/js" "19.5.6"
 
-"@nrwl/nest@19.5.6":
-  version "19.5.6"
-  resolved "https://registry.yarnpkg.com/@nrwl/nest/-/nest-19.5.6.tgz#8eb1759cbf7c871cc1db34d67c0b9fac58447714"
-  integrity sha512-TPI2eD0JotnAvd3ynnrNiToVRTabjjqabU+JDnH2qrI2GnDwotbazJLxDQTlI62ev2sqs9lw3iMbn1jwJDy5UQ==
+"@nrwl/nest@19.5.4":
+  version "19.5.4"
+  resolved "https://registry.yarnpkg.com/@nrwl/nest/-/nest-19.5.4.tgz#e7149e74c1270eb17887d737d3cc14c8da3954ea"
+  integrity sha512-BRgrNX9AMwmYF20sNWYy3waHFh1jVBWFQAJ6H/N4aiB30STdL/jZ2rRmeNeydq+Y+aqbSNRCRIeQNdgEhcwZlQ==
   dependencies:
-    "@nx/nest" "19.5.6"
+    "@nx/nest" "19.5.4"
 
 "@nrwl/node@19.5.4":
   version "19.5.4"
@@ -1896,13 +1889,6 @@
   integrity sha512-l2xAY6JgPMroaxbNkT+j1xZ5sfS1tEyUizY1C+b44dsKSqtIxm5b0yIaHNY3RWUuqbrzDq7SwvR4jtiHYcTRbQ==
   dependencies:
     "@nx/node" "19.5.4"
-
-"@nrwl/node@19.5.6":
-  version "19.5.6"
-  resolved "https://registry.yarnpkg.com/@nrwl/node/-/node-19.5.6.tgz#a63bbd768ff8b988fb21d21ac2e4efdbb68e2cea"
-  integrity sha512-eiQqeHNtR40cdD0WX33ZUwom3Malt7C7zq+iU5DTLlbeC6ciZGz9pYkeNZ6JJZOEPEUGM5O+7gtWUb+Ig7ZyMQ==
-  dependencies:
-    "@nx/node" "19.5.6"
 
 "@nrwl/react@19.5.4":
   version "19.5.4"
@@ -1933,6 +1919,13 @@
   integrity sha512-oKripEPoMbUjPUYbaHqR3ooKiFhH7YLijsC3/r2a/1YxxO6YAOVkuaJcov+Tp9W/Yi8vr++7R+A8ZXRFJdpk6A==
   dependencies:
     "@nx/web" "19.5.4"
+
+"@nrwl/web@19.5.6":
+  version "19.5.6"
+  resolved "https://registry.yarnpkg.com/@nrwl/web/-/web-19.5.6.tgz#a054364182bef2f25a2edc1596f41b4e40e78abb"
+  integrity sha512-2TJB0zSBjDtl2AaZToTvSLej4ed5YO5nJ9iFsv764WDLI0D/WsciUiZHNdXSIhU0lf2yrs7CmIYZFWAdnXzxKA==
+  dependencies:
+    "@nx/web" "19.5.6"
 
 "@nrwl/webpack@19.5.6":
   version "19.5.6"
@@ -2022,18 +2015,6 @@
     tslib "^2.3.0"
     typescript "~5.4.2"
 
-"@nx/eslint@19.5.6":
-  version "19.5.6"
-  resolved "https://registry.yarnpkg.com/@nx/eslint/-/eslint-19.5.6.tgz#0594fa2727495f5753d549f6a7af3066786e34db"
-  integrity sha512-WLUo4f+ndMVWZ5QqqZiZNCmbLCqEqPBopvGWJg6uUJyrm5HiFsks+1nRp7BxFzj0SwmdmSRzQFvMgorw7lAgCQ==
-  dependencies:
-    "@nx/devkit" "19.5.6"
-    "@nx/js" "19.5.6"
-    "@nx/linter" "19.5.6"
-    semver "^7.5.3"
-    tslib "^2.3.0"
-    typescript "~5.4.2"
-
 "@nx/jest@19.5.4":
   version "19.5.4"
   resolved "https://registry.yarnpkg.com/@nx/jest/-/jest-19.5.4.tgz#66ed29d259984e2412a8f2d8a25375e68c5ef2b5"
@@ -2044,27 +2025,6 @@
     "@nrwl/jest" "19.5.4"
     "@nx/devkit" "19.5.4"
     "@nx/js" "19.5.4"
-    "@phenomnomnominal/tsquery" "~5.0.1"
-    chalk "^4.1.0"
-    identity-obj-proxy "3.0.0"
-    jest-config "^29.4.1"
-    jest-resolve "^29.4.1"
-    jest-util "^29.4.1"
-    minimatch "9.0.3"
-    resolve.exports "1.1.0"
-    tslib "^2.3.0"
-    yargs-parser "21.1.1"
-
-"@nx/jest@19.5.6":
-  version "19.5.6"
-  resolved "https://registry.yarnpkg.com/@nx/jest/-/jest-19.5.6.tgz#4814b1ca24c3f03c43d8c3d0ee33c9aab16d1500"
-  integrity sha512-UkGEl7iAt3MEz+BB4Xp3u641LrMeOytTcbljjyYtR84YtJaYgc8CFmornnw8KVqfavQS+v/nrv8lMbbYQHkWpQ==
-  dependencies:
-    "@jest/reporters" "^29.4.1"
-    "@jest/test-result" "^29.4.1"
-    "@nrwl/jest" "19.5.6"
-    "@nx/devkit" "19.5.6"
-    "@nx/js" "19.5.6"
     "@phenomnomnominal/tsquery" "~5.0.1"
     chalk "^4.1.0"
     identity-obj-proxy "3.0.0"
@@ -2153,24 +2113,17 @@
   dependencies:
     "@nx/eslint" "19.5.4"
 
-"@nx/linter@19.5.6":
-  version "19.5.6"
-  resolved "https://registry.yarnpkg.com/@nx/linter/-/linter-19.5.6.tgz#838338cab69788dc5edb83592a83ce9ed33dd34c"
-  integrity sha512-OS0DZ1TDTvWaZe7ijLT6jkQZCCBg4OseFmP2Y6bqE/oRdyoRv95gCT2MGmyJQXkLoX5j9DMfc4nYXS0VHFYqdg==
-  dependencies:
-    "@nx/eslint" "19.5.6"
-
-"@nx/nest@19.5.6", "@nx/nest@^19.5.4":
-  version "19.5.6"
-  resolved "https://registry.yarnpkg.com/@nx/nest/-/nest-19.5.6.tgz#376f9d575182a1b876a8d67b1722b7551ea8300c"
-  integrity sha512-cIr27QlF3RBb0NhCxJGipQt2uwgERLMJ0nqJhlkbBFlmZsZiFEQ33V89hgGAdPTB3ntEKmubKws0ZySn2hdrCQ==
+"@nx/nest@19.5.4":
+  version "19.5.4"
+  resolved "https://registry.yarnpkg.com/@nx/nest/-/nest-19.5.4.tgz#ac029208e9f4ff8ffee1b7cb325c447d8a8c3be6"
+  integrity sha512-40gdGp4lPPlxpD6OAD0BcI5BZx2rohG8WN5Ed89cY8zLmNXIU+0uKRZ+s4sGAvoZqU3gbtQznqV+7phradoncA==
   dependencies:
     "@nestjs/schematics" "^9.1.0"
-    "@nrwl/nest" "19.5.6"
-    "@nx/devkit" "19.5.6"
-    "@nx/eslint" "19.5.6"
-    "@nx/js" "19.5.6"
-    "@nx/node" "19.5.6"
+    "@nrwl/nest" "19.5.4"
+    "@nx/devkit" "19.5.4"
+    "@nx/eslint" "19.5.4"
+    "@nx/js" "19.5.4"
+    "@nx/node" "19.5.4"
     "@phenomnomnominal/tsquery" "~5.0.1"
     tslib "^2.3.0"
 
@@ -2184,18 +2137,6 @@
     "@nx/eslint" "19.5.4"
     "@nx/jest" "19.5.4"
     "@nx/js" "19.5.4"
-    tslib "^2.3.0"
-
-"@nx/node@19.5.6":
-  version "19.5.6"
-  resolved "https://registry.yarnpkg.com/@nx/node/-/node-19.5.6.tgz#116441b37eece5232adbe5ab17a4066db294fb34"
-  integrity sha512-nWWoZCdomYOo0JmJMiP1UWlAnCdrvqLxXgWS6MNbQTT0rhJSn6em5S9N4TuHA7+aCDInvzNEL8YcVTm1xCbtug==
-  dependencies:
-    "@nrwl/node" "19.5.6"
-    "@nx/devkit" "19.5.6"
-    "@nx/eslint" "19.5.6"
-    "@nx/jest" "19.5.6"
-    "@nx/js" "19.5.6"
     tslib "^2.3.0"
 
 "@nx/nx-darwin-arm64@19.5.4":
@@ -2341,7 +2282,20 @@
     http-server "^14.1.0"
     tslib "^2.3.0"
 
-"@nx/webpack@19.5.6", "@nx/webpack@^19.5.4":
+"@nx/web@19.5.6":
+  version "19.5.6"
+  resolved "https://registry.yarnpkg.com/@nx/web/-/web-19.5.6.tgz#4fc1f7f794fb54f38f9f206477259c20a1718593"
+  integrity sha512-mCw2KpVj8FPieRFn98bMJxF4s1RCMTciC78NKFiC0Dmg0KFmhFUw6geWe8anhhjbTxqFvLENMJQIn9K4dlaL1A==
+  dependencies:
+    "@nrwl/web" "19.5.6"
+    "@nx/devkit" "19.5.6"
+    "@nx/js" "19.5.6"
+    chalk "^4.1.0"
+    detect-port "^1.5.1"
+    http-server "^14.1.0"
+    tslib "^2.3.0"
+
+"@nx/webpack@19.5.6":
   version "19.5.6"
   resolved "https://registry.yarnpkg.com/@nx/webpack/-/webpack-19.5.6.tgz#bfa14d4d9f7fe56b8fcf1340d1857a2c3b15fcc6"
   integrity sha512-7xMYx0MIxf4kuhiIyF7QEee7AgK1wzroO2wl+9fU8sjKhvDgW9k8huMCNkOcScptB3SP4CiM9b7S5c/pwr75hQ==
@@ -2446,6 +2400,11 @@
     loader-utils "^2.0.4"
     schema-utils "^4.2.0"
     source-map "^0.7.3"
+
+"@remix-run/router@1.6.2":
+  version "1.6.2"
+  resolved "https://registry.yarnpkg.com/@remix-run/router/-/router-1.6.2.tgz#bbe75f8c59e0b7077584920ce2cc76f8f354934d"
+  integrity sha512-LzqpSrMK/3JBAVBI9u3NWtOhWNw5AMQfrUFYB0+bDHTSw17z++WJLsPsxAuK+oSddsxk4d7F/JcdDPM1M5YAhA==
 
 "@rollup/rollup-android-arm-eabi@4.19.2":
   version "4.19.2"
@@ -8218,7 +8177,7 @@ nx@19.5.4:
     "@nx/nx-win32-arm64-msvc" "19.5.4"
     "@nx/nx-win32-x64-msvc" "19.5.4"
 
-nx@19.5.6, nx@^19.5.6:
+nx@19.5.6:
   version "19.5.6"
   resolved "https://registry.yarnpkg.com/nx/-/nx-19.5.6.tgz#5dd004590e9b78e672f72f2d0aa28fd8f4543f53"
   integrity sha512-qjP17aa5ViXSpo0bDgJ7O3b8EY/0+PbX7ZIKvG1g6qasohtfM1y4Sx2bbSow0zCKU0+r1LnR53Q0lyX4OOgtUg==
@@ -9231,6 +9190,21 @@ react-refresh@^0.10.0:
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/react-refresh/-/react-refresh-0.10.0.tgz#2f536c9660c0b9b1d500684d9e52a65e7404f7e3"
   integrity sha512-PgidR3wST3dDYKr6b4pJoqQFpPGNKDSCDx4cZoshjXipw3LzO7mG1My2pwEzz2JVkF+inx3xRpDeQLFQGH/hsQ==
+
+react-router-dom@6.11.2:
+  version "6.11.2"
+  resolved "https://registry.yarnpkg.com/react-router-dom/-/react-router-dom-6.11.2.tgz#324d55750ffe2ecd54ca4ec6b7bc7ab01741f170"
+  integrity sha512-JNbKtAeh1VSJQnH6RvBDNhxNwemRj7KxCzc5jb7zvDSKRnPWIFj9pO+eXqjM69gQJ0r46hSz1x4l9y0651DKWw==
+  dependencies:
+    "@remix-run/router" "1.6.2"
+    react-router "6.11.2"
+
+react-router@6.11.2:
+  version "6.11.2"
+  resolved "https://registry.yarnpkg.com/react-router/-/react-router-6.11.2.tgz#006301c4da1a173d7ad76b7ecd2da01b9dd3837a"
+  integrity sha512-74z9xUSaSX07t3LM+pS6Un0T55ibUE/79CzfZpy5wsPDZaea1F8QkrsiyRnA2YQ7LwE/umaydzXZV80iDCPkMg==
+  dependencies:
+    "@remix-run/router" "1.6.2"
 
 react-shallow-renderer@^16.15.0:
   version "16.15.0"

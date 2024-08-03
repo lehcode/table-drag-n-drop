@@ -7,9 +7,7 @@
 
       "@nx/react/typings/cssmodule.d.ts",
       "@nx/react/typings/image.d.ts"
-    ],
-    "composite": true,
-    "declaration": true
+    ]
   },
   "exclude": [
     "jest.config.ts",
@@ -22,6 +20,5 @@
     "src/**/*.spec.jsx",
     "src/**/*.test.jsx"
   ],
-  "include": ["src/**/*.ts", "src/**/*.tsx", "../libs/src/**/*.ts"],
-  
+  "include": ["src/**/*.ts", "src/**/*.tsx", "../libs/src/**/*.ts"]
 }
