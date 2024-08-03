@@ -1,12 +1,7 @@
 {
   "targetDefaults": {
-    "build": {
-      "cache": true,
-      "dependsOn": ["typecheck"]
-    },
-    "lint": {
-      "cache": true
-    },
+    "build": { "cache": true, "dependsOn": ["typecheck"] },
+    "lint": { "cache": true },
     "serve": {
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
@@ -16,30 +11,20 @@
         "runBuildTargetDependencies": false
       },
       "configurations": {
-        "development": {
-          "buildTarget": "front:build:development"
-        },
-        "production": {
-          "buildTarget": "front:build:production"
-        }
+        "development": { "buildTarget": "front:build:development" },
+        "production": { "buildTarget": "front:build:production" }
       }
     },
-    "typecheck": {
-      "cache": true
-    },
+    "typecheck": { "cache": true },
     "@nx/js:tsc": {
       "cache": true,
       "dependsOn": ["^build"],
       "inputs": ["default", "^default"]
     },
-    "test": {
-      "cache": true
-    }
+    "test": { "cache": true }
   },
   "defaultBase": "master",
-  "installation": {
-    "version": "19.5.4"
-  },
+  "installation": { "version": "19.5.4" },
   "plugins": [
     {
       "plugin": "@nx/webpack/plugin",
@@ -49,24 +34,14 @@
         "previewTargetName": "preview"
       }
     },
-    {
-      "plugin": "@nx/eslint/plugin",
-      "options": {
-        "targetName": "lint"
-      }
-    },
+    { "plugin": "@nx/eslint/plugin", "options": { "targetName": "lint" } },
     {
       "plugin": "@nx/playwright/plugin",
-      "options": {
-        "ciTargetName": "e2e-ci",
-        "targetName": "e2e"
-      }
+      "options": { "ciTargetName": "e2e-ci", "targetName": "e2e" }
     },
     {
       "plugin": "@nx/jest/plugin",
-      "options": {
-        "targetName": "test"
-      },
+      "options": { "targetName": "test" },
       "exclude": [
         "front-e2e/**/*",
         "backend-e2e/**/*",
@@ -84,13 +59,9 @@
         "linter": "eslint",
         "bundler": "webpack"
       },
-      "component": {
-        "style": "css"
-      },
-      "library": {
-        "style": "css",
-        "linter": "eslint"
-      }
+      "component": { "style": "css" },
+      "library": { "style": "css", "linter": "eslint" }
     }
-  }
+  },
+  "nxCloudAccessToken": "MzQ1ODgyZjEtZGUzNS00NGI3LWIyOGUtMTgxMTk2YWU2NTAwfHJlYWQtd3JpdGU="
 }
