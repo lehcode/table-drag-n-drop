@@ -5,7 +5,7 @@
   "scripts": {
     "typecheck": "tsc",
     "build-ci-all": "nx run-many --target=build --projects=front,backend --parallel=true --skipNxCache",
-    "build-ci-api": "npx nx run backend:build:production --skipNxCache",
+    "build-ci-api": "npx nx run backend:build:production --skipNxCache --verbose",
     "build-ci-front": "npx nx build front:build:production --skipNxCache",
     "start-api": "nx run backend:serve",
     "start-front": "nx run front:serve",
