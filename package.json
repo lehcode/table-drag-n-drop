@@ -14,7 +14,7 @@
     "nx": "nx",
     "build-all": "nx run-many --target=build --projects=front,backend --parallel=true --output-style=static --skipNxCache",
     "build-api": "nx run backend:build --skipNxCache",
-    "build-front": "nx build front:build --skipNxCache",
+    "build-front": "nx run front:build --skipNxCache",
     "start-api": "nx run backend:serve --verbose",
     "start-front": "nx run front:serve",
     "start-all": "nx run-many --verbose --target=serve --projects=front,backend --parallel=true",
